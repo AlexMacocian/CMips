@@ -1,4 +1,7 @@
 # CMips
+
+[![Join the chat at https://gitter.im/CMips32/Lobby](https://badges.gitter.im/CMips32/Lobby.svg)](https://gitter.im/CMips32/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A C implementation of a 32 bits MIPS processor.
 
 ## 1.0. Getting started
