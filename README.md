@@ -162,8 +162,7 @@ If a return code has been provided by using SYSCALL, the application will return
 
 ## 5. Ending note
 
-Feel free to use it as you want as long as it is not in a commercial product. If you want to use it in a commercial product, please contact me first, as not only it is violating the GPL license, but I really think it could help you if I were to assist you with details about the code than you just diving deep into it.
-
+Feel free to use it as you want as long as it is not in a commercial product. If you want to use it in a commercial product, please contact me before. I will not stop you from using it but I could probably help you understand it better than you just diving deep into the code.
 The code is still under review and changes and not thoroughly debugged. Most instructions work but some of them are not working properly or entirely.
 
 ## Feel free to submit tickets or changes as you see fit. I will try to review them as fast as I can.
