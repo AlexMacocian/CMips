@@ -24,11 +24,11 @@ The application allows you to load multiple other files, including a data memory
 ### 2.4. Work memory (RAM)
 Ultimately you can load the application providing a RAM file using the argument "-m" and its size specified using the argument "-ms". This file can theoretically have unlimited size and the architecture does allow really large sizes (the order of millions of lines), so in case you want to work with a lot of data, this is the place to load it.
 
-### 2.5. Assembly files
-There's one last developmental option. The application can accept files written in MIPS assembly. Most of the instructions work, though the jumps are currently not working properly.
-
-### 2.6. Debugging
+### 2.5. Debugging
 If you are in need of debugging, you can run the application using "-v". This option will print in the console each step the application does in a really verbose and explicit way.
+
+### 2.6. Assembly files
+There's one last developmental option. The application can accept files written in MIPS assembly. Most of the instructions work, though the jumps are currently not working properly.
 
 ## 3.0. Supported instructions
 
