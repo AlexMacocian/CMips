@@ -1,4 +1,4 @@
-# Mips32Bit
+# CMips
 A C implementation of a 32 bits MIPS processor.
 
 ## 1.0. Getting started
