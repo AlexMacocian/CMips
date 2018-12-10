@@ -163,6 +163,6 @@ Feel free to use it as you want as long as it is not in a commercial product. If
 
 The code is still under review and changes and not thoroughly debugged. Most instructions work but some of them are not working properly or entirely.
 
-##Feel free to submit tickets or changes as you see fit. I will try to review them as fast as I can.
+## Feel free to submit tickets or changes as you see fit. I will try to review them as fast as I can.
 
-##Find me on Gitter as well. https://gitter.im/CMips32/Lobby
+## Find me on Gitter as well. https://gitter.im/CMips32/Lobby
