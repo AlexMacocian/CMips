@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "stdio.h"
 #include "sys/file.h"
 #include "string.h"
@@ -58,86 +59,86 @@
 #define ra 31
 
 //Variables
-__uint8_t loadType = 0;
-__uint8_t verbose = 0;
-__uint8_t program_counter = 0;
-__uint8_t brk = 0;
-__uint8_t stop = 0;
-__int32_t result = 0;
-__uint8_t ram_init = 0;
-__uint32_t ram_size = 1000000;
+uint8_t loadType = 0;
+uint8_t verbose = 0;
+uint8_t program_counter = 0;
+uint8_t brk = 0;
+uint8_t stop = 0;
+int32_t result = 0;
+uint8_t ram_init = 0;
+uint32_t ram_size = 1000000;
 FILE *im, *dm, *rm;
 FILE **files;
 
 //Register types
 typedef struct __32BitReg{
     union {
-        __uint32_t data;
+        uint32_t data;
         struct{
-            __uint32_t bit1 : 1;
-            __uint32_t bit2 : 1;
-            __uint32_t bit3 : 1;
-            __uint32_t bit4 : 1;
-            __uint32_t bit5 : 1;
-            __uint32_t bit6 : 1;
-            __uint32_t bit7 : 1;
-            __uint32_t bit8 : 1;
-            __uint32_t bit9 : 1;
-            __uint32_t bit10 : 1;
-            __uint32_t bit11 : 1;
-            __uint32_t bit12 : 1;
-            __uint32_t bit13 : 1;
-            __uint32_t bit14 : 1;
-            __uint32_t bit15 : 1;
-            __uint32_t bit16 : 1;
-            __uint32_t bit17 : 1;
-            __uint32_t bit18 : 1;
-            __uint32_t bit19 : 1;
-            __uint32_t bit20 : 1;
-            __uint32_t bit21 : 1;
-            __uint32_t bit22 : 1;
-            __uint32_t bit23 : 1;
-            __uint32_t bit24 : 1;
-            __uint32_t bit25 : 1;
-            __uint32_t bit26 : 1;
-            __uint32_t bit27 : 1;
-            __uint32_t bit28 : 1;
-            __uint32_t bit29 : 1;
-            __uint32_t bit30 : 1;
-            __uint32_t bit31 : 1;
-            __uint32_t bit32 : 1;
+            uint32_t bit1 : 1;
+            uint32_t bit2 : 1;
+            uint32_t bit3 : 1;
+            uint32_t bit4 : 1;
+            uint32_t bit5 : 1;
+            uint32_t bit6 : 1;
+            uint32_t bit7 : 1;
+            uint32_t bit8 : 1;
+            uint32_t bit9 : 1;
+            uint32_t bit10 : 1;
+            uint32_t bit11 : 1;
+            uint32_t bit12 : 1;
+            uint32_t bit13 : 1;
+            uint32_t bit14 : 1;
+            uint32_t bit15 : 1;
+            uint32_t bit16 : 1;
+            uint32_t bit17 : 1;
+            uint32_t bit18 : 1;
+            uint32_t bit19 : 1;
+            uint32_t bit20 : 1;
+            uint32_t bit21 : 1;
+            uint32_t bit22 : 1;
+            uint32_t bit23 : 1;
+            uint32_t bit24 : 1;
+            uint32_t bit25 : 1;
+            uint32_t bit26 : 1;
+            uint32_t bit27 : 1;
+            uint32_t bit28 : 1;
+            uint32_t bit29 : 1;
+            uint32_t bit30 : 1;
+            uint32_t bit31 : 1;
+            uint32_t bit32 : 1;
         };
     };
 } __32BitReg;
 typedef struct __3BitReg{
     union {
-        __uint8_t data;
+        uint8_t data;
         struct{
-            __uint8_t bit1 : 1;
-            __uint8_t bit2 : 1;
-            __uint8_t bit3 : 1;
+            uint8_t bit1 : 1;
+            uint8_t bit2 : 1;
+            uint8_t bit3 : 1;
         };
     };
 } __3BitReg;
 typedef struct __ALUFlagReg{
     union {
-        __uint8_t data;
+        uint8_t data;
         struct{
-            __uint8_t z : 1;
-            __uint8_t v : 1;
-            __uint8_t c : 1;
+            uint8_t z : 1;
+            uint8_t v : 1;
+            uint8_t c : 1;
         };
     };
 } __ALUFlagReg;
 typedef struct __5BitReg{
     union {
-        __uint8_t data;
+        uint8_t data;
         struct{
-            __uint8_t bit1 : 1;
-            __uint8_t bit2 : 1;
-            __uint8_t bit3 : 1;
-            __uint8_t bit4 : 1;
-            __uint8_t bit5 : 1;
+            uint8_t bit1 : 1;
+            uint8_t bit2 : 1;
+            uint8_t bit3 : 1;
+            uint8_t bit4 : 1;
+            uint8_t bit5 : 1;
         };
     };
 } __5BitReg;
@@ -1194,15 +1195,15 @@ void LoadFromAssembly(){
 
 void LoadInstructionMemory(){
     int ch;
-    __uint8_t row = 0;
-    __uint8_t column = 0;
+    uint8_t row = 0;
+    uint8_t column = 0;
     if(im != NULL){
         if(verbose > 0){
             printf("Loading instruction memory\n");
         }
         while((ch = fgetc(im)) != EOF){
             if(ch >= 48 && ch <= 49){
-                __uint8_t v = ch - 48;
+                uint8_t v = ch - 48;
                 Instruction_Memory[row].data = Instruction_Memory[row].data << 1;
                 Instruction_Memory[row].data += v;
                 column++;
@@ -1221,15 +1222,15 @@ void LoadInstructionMemory(){
 
 void LoadDataMemory(){
     int ch;
-    __uint8_t row = 0;
-    __uint8_t column = 0;
+    uint8_t row = 0;
+    uint8_t column = 0;
     if(dm != NULL){
         if(verbose > 0){
             printf("Loading data memory\n");
         }
         while((ch = fgetc(dm)) != EOF){
             if(ch >= 48 && ch <= 49){
-                __uint8_t v = ch - 48;
+                uint8_t v = ch - 48;
                 Data_Memory[row].data = Data_Memory[row].data << 1;
                 Data_Memory[row].data += v;
                 column++;
@@ -1248,8 +1249,8 @@ void LoadDataMemory(){
 
 void LoadRAM(){
     int ch;
-    __uint8_t row = 0;
-    __uint8_t column = 0;
+    uint8_t row = 0;
+    uint8_t column = 0;
     
     Memory = malloc(ram_size * (sizeof(__32BitReg)));
     ram_init = 1;
@@ -1264,7 +1265,7 @@ void LoadRAM(){
         }
         while((ch = fgetc(rm)) != EOF){
             if(ch >= 48 && ch <= 49){
-                __uint8_t v = ch - 48;
+                uint8_t v = ch - 48;
                 Memory[row].data = Memory[row].data << 1;
                 Memory[row].data += v;
                 column++;
@@ -1409,14 +1410,14 @@ void ProcessorRun(){
 }
 
 void ProcessInstruction(__32BitReg *instruction){
-    __uint8_t opcode = (instruction->data & op_mask) >> 26;
+    uint8_t opcode = (instruction->data & op_mask) >> 26;
     printf("%d. ", program_counter);
     if(opcode == 0b000000){ //R-Type Instruction
-        __uint8_t function = (instruction->data & fc_mask);
-        __uint8_t rd = (instruction->data & rd_mask) >> 11;
-        __uint8_t rt = (instruction->data & rt_mask) >> 16;
-        __uint8_t rs = (instruction->data & rs_mask) >> 21;
-        __uint8_t sa = (instruction->data & sh_mask) >> 6;
+        uint8_t function = (instruction->data & fc_mask);
+        uint8_t rd = (instruction->data & rd_mask) >> 11;
+        uint8_t rt = (instruction->data & rt_mask) >> 16;
+        uint8_t rs = (instruction->data & rs_mask) >> 21;
+        uint8_t sa = (instruction->data & sh_mask) >> 6;
         if(function == 0b100000){//ADD
             ALU_a.data = Data_Memory[rs].data;
             ALU_b.data = Data_Memory[rt].data;
@@ -1461,7 +1462,7 @@ void ProcessInstruction(__32BitReg *instruction){
             ALU_a.data = Data_Memory[rs].data;
             ALU_b.data = Data_Memory[rt].data;
             ALU_op.data = SUB;
-            __uint32_t div = 0;
+            uint32_t div = 0;
             while(ALU_a.data > ALU_b.data){
                 ALU();
                 ALU_a.data = ALU_out.data;
@@ -1478,7 +1479,7 @@ void ProcessInstruction(__32BitReg *instruction){
             ALU_a.data = Data_Memory[rs].data;
             ALU_b.data = Data_Memory[rt].data;
             ALU_op.data = SUB;
-            __uint32_t div = 0;
+            uint32_t div = 0;
             while(ALU_a.data > ALU_b.data){
                 ALU();
                 ALU_a.data = ALU_out.data;
@@ -1533,7 +1534,7 @@ void ProcessInstruction(__32BitReg *instruction){
             }
         }
         else if(function == 0b011000){//MULT
-            __uint32_t multicand;
+            uint32_t multicand;
             if(Data_Memory[rt].bit32 == 1){
                 multicand = -Data_Memory[rt].data;
                 if(Data_Memory[rs].bit32 == 1){
@@ -1560,7 +1561,7 @@ void ProcessInstruction(__32BitReg *instruction){
                 ALU_b.data = ALU_a.data;
             }
             ALU_op.data = ADD;
-            for(__uint32_t i = 0; i < multicand; i++){
+            for(uint32_t i = 0; i < multicand; i++){
                 ALU();
                 ALU_b.data = ALU_out.data;
             }
@@ -1571,7 +1572,7 @@ void ProcessInstruction(__32BitReg *instruction){
             }
         }
         else if(function == 0b011001){//MULTU
-            __uint32_t multicand;
+            uint32_t multicand;
             if(Data_Memory[rt].bit32 == 1){
                 multicand = -Data_Memory[rt].data;
                 if(Data_Memory[rs].bit32 == 1){
@@ -1598,7 +1599,7 @@ void ProcessInstruction(__32BitReg *instruction){
                 ALU_b.data = ALU_a.data;
             }
             ALU_op.data = ADD;
-            for(__uint32_t i = 0; i < multicand; i++){
+            for(uint32_t i = 0; i < multicand; i++){
                 ALU();
                 ALU_b.data = ALU_out.data;
             }
@@ -1745,7 +1746,7 @@ void ProcessInstruction(__32BitReg *instruction){
                 case 4://PRINT STRING
                 {
                     int offset = 0;
-                    __uint8_t c = Memory[Data_Memory[a0].data + offset].data & 0xff;
+                    uint8_t c = Memory[Data_Memory[a0].data + offset].data & 0xff;
                     while(c != '\n'){
                         printf("%c", c);
                         offset++;
@@ -1774,7 +1775,7 @@ void ProcessInstruction(__32BitReg *instruction){
                 }
                 break;
                 case 9://ALLOCATE HEAP
-                    for(__uint8_t i = 0; i < Data_Memory[a0].data; i++){
+                    for(uint8_t i = 0; i < Data_Memory[a0].data; i++){
                         Memory[Data_Memory[v0].data + i].data = 0;
                     }
                 break;
@@ -1797,7 +1798,7 @@ void ProcessInstruction(__32BitReg *instruction){
                         offset++;
                         c = Memory[Data_Memory[a0].data + offset].data;
                     }
-                    __uint8_t flags = Data_Memory[a1].data;
+                    uint8_t flags = Data_Memory[a1].data;
                     FILE *fd;
                     if(flags == 0){//READ ONLY
                         fd = fopen(filename, "r");
@@ -1872,9 +1873,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b001000){ //ADDI
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[rs].data;
         ALU_b.data = immediate;
         ALU_op.data = ADD;
@@ -1886,9 +1887,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b001001){ //ADDIU
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[rs].data;
         ALU_b.data = immediate;
         ALU_op.data = ADD;
@@ -1900,9 +1901,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b001100){ //ANDI
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[rs].data;
         ALU_b.data = immediate;
         ALU_op.data = AND;
@@ -1914,9 +1915,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b000100){ //BEQ
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[rs].data;
         ALU_b.data = Data_Memory[rt].data;
         ALU_op.data = SUB;
@@ -1930,8 +1931,8 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b000001 && instruction->bit17 == 1 && instruction->bit21 == 0){ //BGEZ
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[rs].data;
         ALU_b.data = Data_Memory[0].data;
         ALU_op.data = SLT;
@@ -1945,8 +1946,8 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b000001 && instruction->bit17 == 1 && instruction->bit21 == 1){ //BGEZAL
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[rs].data;
         ALU_b.data = Data_Memory[0].data;
         ALU_op.data = SLT;
@@ -1961,8 +1962,8 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b000111 && instruction->bit17 == 0 && instruction->bit21 == 0){ //BGTZ
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[0].data;
         ALU_b.data = Data_Memory[rs].data;
         ALU_op.data = SLT;
@@ -1972,12 +1973,12 @@ void ProcessInstruction(__32BitReg *instruction){
         }
         program_counter++;
         if(verbose){
-            printf("if([%d] = [0]) PC += %d\n", rs, immediate);
+            printf("if([%d] > [0]) PC += %d\n", rs, immediate);
         }
     }
     else if(opcode == 0b000110 && instruction->bit17 == 0 && instruction->bit21 == 0){ //BLEZ
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[0].data;
         ALU_b.data = Data_Memory[rs].data;
         ALU_op.data = SLT;
@@ -1987,12 +1988,12 @@ void ProcessInstruction(__32BitReg *instruction){
         }
         program_counter++;
         if(verbose){
-            printf("if([%d] = [0]) PC += %d\n", rs, immediate);
+            printf("if([%d] <= [0]) PC += %d\n", rs, immediate);
         }
     }
     else if(opcode == 0b000001 && instruction->bit17 == 0 && instruction->bit21 == 0){ //BLTZ
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[rs].data;
         ALU_b.data = Data_Memory[0].data;
         ALU_op.data = SLT;
@@ -2002,13 +2003,13 @@ void ProcessInstruction(__32BitReg *instruction){
         }
         program_counter++;
         if(verbose){
-            printf("if([%d] = [0]) PC += %d\n", rs, immediate);
+            printf("if([%d] < [0]) PC += %d\n", rs, immediate);
         }
     }
     else if(opcode == 0b000101){ //BNE
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[rs].data;
         ALU_b.data = Data_Memory[rt].data;
         ALU_op.data = SUB;
@@ -2022,9 +2023,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b100000){ //LB
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         Data_Memory[rt].data = Memory[Data_Memory[rs].data + immediate].data & 0xff;
         program_counter++;
         if(verbose){
@@ -2032,9 +2033,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b100100){ //LBU
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         Data_Memory[rt].data = Memory[Data_Memory[rs].data + immediate].data & 0xff;
         program_counter++;
         if(verbose){
@@ -2042,9 +2043,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b100001){ //LH
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         Data_Memory[rt].data = Memory[Data_Memory[rs].data + immediate].data & 0xffff;
         program_counter++;
         if(verbose){
@@ -2052,9 +2053,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b100101){ //LHU
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         Data_Memory[rt].data = Memory[Data_Memory[rs].data + immediate].data & 0xffff;
         program_counter++;
         if(verbose){
@@ -2062,8 +2063,8 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b001111){ //LUI
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int16_t immediate = (instruction->data & im_mask);
         Data_Memory[rt].data = immediate << 16;
         program_counter++;
         if(verbose){
@@ -2071,9 +2072,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b100101){ //LW
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         Data_Memory[rt].data = Memory[Data_Memory[rs].data + immediate].data;
         program_counter++;
         if(verbose){
@@ -2081,9 +2082,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b001100){ //ORI
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[rs].data;
         ALU_b.data = immediate;
         ALU_op.data = OR;
@@ -2095,9 +2096,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b100000){ //SB
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         Memory[Data_Memory[rs].data + immediate].data = 0xff & Data_Memory[rt].data;
         program_counter++;
         if(verbose){
@@ -2105,9 +2106,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b001010){ //SLTI
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[rs].data;
         ALU_b.data = immediate;
         ALU_op.data = SLT;
@@ -2119,9 +2120,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b001011){ //SLTIU
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[rs].data;
         ALU_b.data = immediate;
         ALU_op.data = SLT;
@@ -2133,9 +2134,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b101001){ //SH
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         Memory[Data_Memory[rs].data + immediate].data = 0xffff & Data_Memory[rt].data;
         program_counter++;
         if(verbose){
@@ -2143,9 +2144,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b101011){ //SW
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         Memory[Data_Memory[rs].data + immediate].data = Data_Memory[rt].data;
         program_counter++;
         if(verbose){
@@ -2153,9 +2154,9 @@ void ProcessInstruction(__32BitReg *instruction){
         }
     }
     else if(opcode == 0b001110){ //XORI
-        __int8_t rt = (instruction->data & rt_mask) >> 16;
-        __int8_t rs = (instruction->data & rs_mask) >> 21;
-        __int16_t immediate = (instruction->data & im_mask);
+        int8_t rt = (instruction->data & rt_mask) >> 16;
+        int8_t rs = (instruction->data & rs_mask) >> 21;
+        int16_t immediate = (instruction->data & im_mask);
         ALU_a.data = Data_Memory[rs].data;
         ALU_b.data = immediate;
         ALU_op.data = XOR;
@@ -2163,22 +2164,22 @@ void ProcessInstruction(__32BitReg *instruction){
         Data_Memory[rt].data = ALU_out.data;
         program_counter++;
         if(verbose){
-            printf("[%d] = [%d] | %d\n", rt, rs, immediate);
+            printf("[%d] = [%d] XOR %d\n", rt, rs, immediate);
         }
     }
     else if(opcode == 0b000010){ //J
-        __int32_t address = (instruction->data & ad_mask);
+        int32_t address = (instruction->data & ad_mask);
         program_counter = address;
         if(verbose){
             printf("PC = %d\n", address);
         }
     }
     else if(opcode == 0b000011){ //JAL
-        __int32_t address = (instruction->data & ad_mask);
+        int32_t address = (instruction->data & ad_mask);
         Data_Memory[31].data = program_counter + 2;
         program_counter = address;
         if(verbose){
-            printf("[31] = PC + 2; PC = %d\n", address);
+            printf("[31] = PC + 8; PC = %d\n", address);
         }
     }
 }
