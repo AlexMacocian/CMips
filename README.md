@@ -35,18 +35,17 @@ If you are in need of debugging, you can run the application using "-v". This op
 ### 3.1. R-Type instructions
 #### 3.1.1. Instruction layout
 
---------------------------------------------------
-|Opcode(6)|Rs(5)|Rt(5)|Rd(5)|Shamt(5)|Function(6)|
---------------------------------------------------
+
+| Opcode(6) | Rs(5) | Rt(5) | Rd(5) | Shamt(5) | Function(6) |
+|---|---|---|---|---|---|
 
 #### 3.1.2. Instruction table
 
 For all R-Type instructions, Opcode is "000000".
 The table bellow shows the function bits and their resulting instruction
 
--------------------------------------------------------
 |Function  |  Bits  | Description                     |
--------------------------------------------------------
+|----------|--------|---------------------------------|
 | ADD      | 100000 | Rd = Rs + Rt                    |
 | ADDU     | 100001 | Rd = Rs + Rt                    |
 | AND      | 001101 | Rd = Rs & Rt                    |
@@ -74,7 +73,6 @@ The table bellow shows the function bits and their resulting instruction
 | SUBU     | 100011 | Rd = Rs - Rt                    |
 | SYSCALL  | 001100 | ##############################  | *Will be detailed a bit further*
 | XOR      | 100110 | Rd = Rs ^ Rt                    |
--------------------------------------------------------
 
 #### 3.1.3. SYSCALL Details
 
@@ -82,48 +80,45 @@ After calling Syscall, the system will do an operation based on the value in the
 
 The following operations are supported.
 
---------------------------
-|   Operation    | Value |
---------------------------
-| Print int      |  1    | *Prints the value in register a0*
-| Print float    |  2    |
-| Print string   |  4    | *The system will start reading from RAM starting with the address given in register a0 until it reaches "\n"*
-| Read int       |  5    | *Reads the value from into the register v0*
-| Read float     |  6    |
-| Read string    |  8    | *Reads string and writes it into RAM at the address given in a0 until "\n" or until reading max chars in a1*
-| Allocate heap  |  9    | *Right now it only resets the registers in the RAM*
+|   Operation    | Value | Description |
+|----------------|-------|---|
+| Print int      |  1    | *Prints the value in register a0* |
+| Print float    |  2    | |
+| Print string   |  4    | *The system will start reading from RAM starting with the address given in register a0 until it reaches "\n"*|
+| Read int       |  5    | *Reads the value from into the register v0* |
+| Read float     |  6    | |
+| Read string    |  8    | *Reads string and writes it into RAM at the address given in a0 until "\n" or until reading max chars in a1* |
+| Allocate heap  |  9    | *Right now it only resets the registers in the RAM* |
 | Exit           |  10   |
-| Print char     |  11   | *Prints char contained in a0*
-| Read char      |  12   | *Reads char into v0*
-| Open file      |  13   | *Reads file name from RAM at address a0. Stores file descriptor in v0*
-| Read from file |  14   | *a0 contains fd. Reads from fd all chars or until it reaches value in a2 and stores in RAM at address a1*
-| Write to file  |  15   | *a0 contains fd. Writes to fd all chars until "\0" or until it reaches value in a2 from RAM at address a1*
-| Close file     |  16   | *Close file with fd in a0*
-| Exit with code |  17   | *Exits with a return value specified in a0"
---------------------------
+| Print char     |  11   | *Prints char contained in a0* |
+| Read char      |  12   | *Reads char into v0* |
+| Open file      |  13   | *Reads file name from RAM at address a0. Stores file descriptor in v0* |
+| Read from file |  14   | *a0 contains fd. Reads from fd all chars or until it reaches value in a2 and stores in RAM at address a1* |
+| Write to file  |  15   | *a0 contains fd. Writes to fd all chars until "\0" or until it reaches value in a2 from RAM at address a1* |
+| Close file     |  16   | *Close file with fd in a0* |
+| Exit with code |  17   | *Exits with a return value specified in a0"* |
 
 
 ### 3.2. I-Type Instructions
 #### 3.2.1. Instruction layout
 
---------------------------------------------------
-|Opcode(6)|Rs(5)|Rt(5)|       Immediate(16)      |
---------------------------------------------------
+
+| Opcode(6) | Rs(5) | Rt(5) |       Immediate(16)      |
+|-----------|------|--------|---------------------|
 
 #### 3.2.2. Instruction table
 
--------------------------------------------------------
 |  Opcode  |  Bits  | Description                     |
--------------------------------------------------------
+|----------|--------|---------------------------------|
 |   ADDI   | 001000 | Rt = Rs + imm                   |
 |   ADDIU  | 001001 | Rt = Rs + imm                   |
 |   ANDI   | 001100 | Rt = Rs & imm                   |
 |   BEQ    | 000100 | if(Rt==Rs) PC+=imm              |
-|   BGEZ   | 000001 | if(Rs >= v0) PC+=imm;           | *NOTE: Bit 17 must be 1 and 21 must be 0*
-|   BGEZAL | 000001 | if(Rs >= v0) ra=PC+8; PC += imm | *NOTE: Bit 17 must be 1 and 21 must be 1*
-|   BGTZ   | 000111 | if(Rs > 0) PC+=imm              | *NOTE: Bit 17 must be 0 and 21 must be 0*
-|   BLEZ   | 000110 | if(Rs <= 0) PC+=imm             | *NOTE: Bit 17 must be 0 and 21 must be 0*
-|   BLTZ   | 000001 | if(Rs < 0) PC+=imm              | *NOTE: Bit 17 must be 0 and 21 must be 0*
+|   BGEZ   | 000001 | if(Rs >= v0) PC+=imm;           ###*NOTE: Bit 17 must be 1 and 21 must be 0*          | 
+|   BGEZAL | 000001 | if(Rs >= v0) ra=PC+8; PC += imm ###*NOTE: Bit 17 must be 1 and 21 must be 1* | 
+|   BGTZ   | 000111 | if(Rs > 0) PC+=imm              ###*NOTE: Bit 17 must be 0 and 21 must be 0* | 
+|   BLEZ   | 000110 | if(Rs <= 0) PC+=imm             ###*NOTE: Bit 17 must be 0 and 21 must be 0*  | 
+|   BLTZ   | 000001 | if(Rs < 0) PC+=imm              ###*NOTE: Bit 17 must be 0 and 21 must be 0*  | 
 |   BNE    | 000101 | if(Rt!=Rs) PC+=imm              |
 |   LB     | 100000 | Rt = MEM[Rs + imm] & 0xff       |
 |   LBU    | 100100 | Rt = MEM[Rs + imm] & 0xff       |
@@ -138,23 +133,21 @@ The following operations are supported.
 |   SH     | 101001 | MEM[Rs + imm] = Rt & 0xffff     |
 |   SW     | 001110 | MEM[Rs + imm] = Rt              |
 |   XORI   | 001110 | Rt = Rs XOR imm                 |
--------------------------------------------------------
 
 ### 3.3. J-Type Instructions
 #### 3.3.1. Instruction layout
 
---------------------------------------------------
+
 |Opcode(6)|             Address(26)              |
---------------------------------------------------
+|---------|--------------------------------------|
 
 #### 3.3.2. Instruction Table
 
--------------------------------------------------------
 |  Opcode  |  Bits  | Description                     |
--------------------------------------------------------
+|----------|--------|---------------------------------|
 |   J      | 000010 | PC = addr                       |
 |   JAL    | 000011 | ra = PC + 8; PC = addr          |
--------------------------------------------------------
+
 
 
 ## 4. Termination
