@@ -13,6 +13,9 @@ Then, run it by using ./cmips.
 ### 1.2. Windows
 Download MinGW and set up the environment variables properly (add the bin folder of MinGW to PATH). After, simply use "gcc -o cmipc Mipc.c" to compile. Lastly, run using cmips.
 
+### 1.3. Windows using WSL
+Run it using the same steps as in the Linux explanation.
+
 ### 1.3 Other operating systems
 The code is written in ANSI-C and it tries to be as dependency free as possible. Thus, it should technically work on any OS that has something similar to MinGW or that implements a very tiny subset of POSIX that handles user input and output.
 
