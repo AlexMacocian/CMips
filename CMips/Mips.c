@@ -1420,7 +1420,9 @@ void ProcessorRun(){
 
 void ProcessInstruction(__32BitReg *instruction){
     uint8_t opcode = (instruction->data & op_mask) >> 26;
-    printf("%d. ", program_counter);
+    if(verbose > 0){
+    	printf("%d. ", program_counter);
+    }
     if(opcode == 0b000000){ //R-Type Instruction
         uint8_t function = (instruction->data & fc_mask);
         uint8_t rd = (instruction->data & rd_mask) >> 11;
@@ -2354,168 +2356,167 @@ int GetLengthOfLine(char * line){
 int IsInstruction(char* line){
             char ** tokens = Tokenize(line);
             char *instr = tokens[0];
-            if(strcmp(instr, "add") == 0){
+            if(strncmp(instr, "add", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "addu") == 0){
+            else if(strncmp(instr, "addu", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "and") == 0){
+            else if(strncmp(instr, "and", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "break") == 0){
+            else if(strncmp(instr, "break", 5) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "div") == 0){
+            else if(strncmp(instr, "div", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "divu") == 0){
+            else if(strncmp(instr, "divu", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "jalr") == 0){
+            else if(strncmp(instr, "jalr", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "jr") == 0){
+            else if(strncmp(instr, "jr", 2) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "mfhi") == 0){
+            else if(strncmp(instr, "mfhi", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "mflo") == 0){
+            else if(strncmp(instr, "mflo", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "mthi") == 0){
+            else if(strncmp(instr, "mthi", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "mtlo") == 0){
+            else if(strncmp(instr, "mtlo", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "mult") == 0){
+            else if(strncmp(instr, "mult", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "multu") == 0){
+            else if(strncmp(instr, "multu", 5) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "nor") == 0){
+            else if(strncmp(instr, "nor", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "or") == 0){
+            else if(strncmp(instr, "or", 2) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "sll") == 0){
+            else if(strncmp(instr, "sll", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "sllv") == 0){
+            else if(strncmp(instr, "sllv", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "slt") == 0){
+            else if(strncmp(instr, "slt", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "sltu") == 0){
+            else if(strncmp(instr, "sltu", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "sra") == 0){
+            else if(strncmp(instr, "sra", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "srav") == 0){
+            else if(strncmp(instr, "srav", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "srl") == 0){
+            else if(strncmp(instr, "srl", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "srlv") == 0){
+            else if(strncmp(instr, "srlv", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "sub") == 0){
+            else if(strncmp(instr, "sub", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "subu") == 0){
+            else if(strncmp(instr, "subu", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "syscall") == 0){
+            else if(strncmp(instr, "syscall", 7) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "xor") == 0){
+            else if(strncmp(instr, "xor", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "addi") == 0){
+            else if(strncmp(instr, "addi", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "addiu") == 0){
+            else if(strncmp(instr, "addiu", 5) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "andi") == 0){
+            else if(strncmp(instr, "andi", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "beq") == 0){
+            else if(strncmp(instr, "beq", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "bgez") == 0){
+            else if(strncmp(instr, "bgez", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "bgtz") == 0){
+            else if(strncmp(instr, "bgtz", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "blez") == 0){
+            else if(strncmp(instr, "blez", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "bltz") == 0){
+            else if(strncmp(instr, "bltz", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "bne") == 0){
+            else if(strncmp(instr, "bne", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "lb") == 0){
+            else if(strncmp(instr, "lb", 2) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "lbu") == 0){
+            else if(strncmp(instr, "lbu", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "lh") == 0){
+            else if(strncmp(instr, "lh", 2) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "lhu") == 0){
+            else if(strncmp(instr, "lhu", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "lui") == 0){
+            else if(strncmp(instr, "lui", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "lw") == 0){
+            else if(strncmp(instr, "lw", 2) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "lwcl") == 0){
+            else if(strncmp(instr, "lwcl", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "ori") == 0){
+            else if(strncmp(instr, "ori", 3) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "sb") == 0){
+            else if(strncmp(instr, "sb", 2) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "slti") == 0){
+            else if(strncmp(instr, "slti", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "sltiu") == 0){
+            else if(strncmp(instr, "sltiu", 5) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "sh") == 0){
+            else if(strncmp(instr, "sh", 2) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "sw") == 0){
+            else if(strncmp(instr, "sw", 2) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "swcl") == 0){
+            else if(strncmp(instr, "swcl", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "xori") == 0){
+            else if(strncmp(instr, "xori", 4) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "j") == 0){
+            else if(strncmp(instr, "j", 1) == 0){
                 return 1;
             }
-            else if(strcmp(instr, "jal") == 0){
+            else if(strncmp(instr, "jal", 3) == 0){
                 return 1;
             }
             return 0;
 }
-
