@@ -5,7 +5,7 @@
 #include "ctype.h"
 #include "limits.h"
 #include "stdlib.h"
-#include "hashmap.h"
+#include "LinkedList.h"
 
 #define BINARY 0
 #define ASSEMBLY 1
@@ -153,7 +153,6 @@ __3BitReg ALU_op;
 
 void PrintHelp();
 void ALU();
-int GetInstrLineOfLabel(char *label);
 int GetLengthOfLine(char * string);
 int GetDataRegAddressFromString(char* string);
 void LoadFromAssembly();
@@ -166,6 +165,7 @@ void WriteRAM();
 void Print32BitRegister(__32BitReg *reg);
 void ProcessorRun();
 void ProcessInstruction(__32BitReg *instruction);
+int IsInstruction(char *line);
 
 int main(int argc, char** argv){
     program_counter = 0;
@@ -263,6 +263,8 @@ void PrintHelp(){
     printf("-v \t\tVerbose mode. Simulator will output all information available\n");
     printf("-ms \t\tRAM size. Simulator will set the number of RAM memory bytes to the specified value. If value is not set, the simulator will allocate a default size of 1000000\n");
     printf("-m <file> \tLoads into the RAM the values read from the specified file\n");
+    printf("-a <file> \tLoads an assembly file to be parsed.\n");
+    printf("Use either -i or -a to initialize the instruction memory\n");
 }
 
 void ALU(){
@@ -319,28 +321,37 @@ void ALU(){
 }
 
 void LoadFromAssembly(){
+    for(int i = 0; i < 32; i++){
+        Instruction_Memory[i].data = 0;
+    }
     if(verbose){
         printf("Loading from assembly file\n");
     }
     char line[256];
     int lineIndex = 0;
     int instr_count = 0;
-    if(im){/*
+    if(im){
         do{//GET LABELS
             fgets(line, 256, im);
-            if(strstr(line, ":")){
-                char *label = strtok(line, ":");
-                lookupTable[instr_count] = label;
+            fflush(stdout);
+            if(IsInstruction(line)){
+                instr_count++;
                 if(verbose){
-                    printf("Found label %s. Inserting in hashmap with value %d\n", label, instr_count);
+                    printf("Found instruction: %s\n", line);
                 }
             }
-            else if(GetLengthOfLine(line) > 8 && !strstr(line, ".")){
-                printf("Here");
-                instr_count++;
+            else{
+                if(strstr(line, ":")){
+                    char *label = strtok(line, ":");
+                    _node *node = CreateNode(instr_count, label);
+                    InsertNode(node, 1);
+                    if(verbose){
+                        printf("Found label %s. Inserting in list with value %d\n", label, instr_count);
+                    }
+                }
             }
             lineIndex++;
-        }while(!feof(im));*/
+        }while(!feof(im));
         fseek(im, 0, SEEK_SET);
         lineIndex = 0;
         instr_count = 0;
@@ -838,7 +849,7 @@ void LoadFromAssembly(){
                 int vrs = GetDataRegAddressFromString(rs);
                 int vrt = GetDataRegAddressFromString(rt);
                 int vl;
-                vl = GetInstrLineOfLabel(label);
+                vl = GetLineOfLabel(label);
                 vl = vl - instr_count;
                 Instruction_Memory[instr_count].data += vrs << 21;
                 Instruction_Memory[instr_count].data += vrt << 16;
@@ -856,8 +867,8 @@ void LoadFromAssembly(){
                 int vrs = GetDataRegAddressFromString(rs);
                 int vrt = 0b00001;
                 int vl;
-                vl = GetInstrLineOfLabel(label);
-                vl = vl - instr_count;
+                vl = GetLineOfLabel(label);
+                vl = vl - instr_count;      
                 Instruction_Memory[instr_count].data += vrs << 21;
                 Instruction_Memory[instr_count].data += vrt << 16;
                 Instruction_Memory[instr_count].data += vl;
@@ -874,7 +885,7 @@ void LoadFromAssembly(){
                 int vrs = GetDataRegAddressFromString(rs);
                 int vrt = 0b00000;
                 int vl;
-                vl = GetInstrLineOfLabel(label);
+                vl = GetLineOfLabel(label);
                 vl = vl - instr_count;
                 Instruction_Memory[instr_count].data += vrs << 21;
                 Instruction_Memory[instr_count].data += vrt << 16;
@@ -892,7 +903,7 @@ void LoadFromAssembly(){
                 int vrs = GetDataRegAddressFromString(rs);
                 int vrt = 0b00000;
                 int vl;
-                vl = GetInstrLineOfLabel(label);
+                vl = GetLineOfLabel(label);
                 vl = vl - instr_count;
                 Instruction_Memory[instr_count].data += vrs << 21;
                 Instruction_Memory[instr_count].data += vrt << 16;
@@ -910,7 +921,7 @@ void LoadFromAssembly(){
                 int vrs = GetDataRegAddressFromString(rs);
                 int vrt = 0b00000;
                 int vl;
-                vl = GetInstrLineOfLabel(label);
+                vl = GetLineOfLabel(label);
                 vl = vl - instr_count;
                 Instruction_Memory[instr_count].data += vrs << 21;
                 Instruction_Memory[instr_count].data += vrt << 16;
@@ -929,7 +940,7 @@ void LoadFromAssembly(){
                 int vrs = GetDataRegAddressFromString(rs);
                 int vrt = GetDataRegAddressFromString(rt);
                 int vl;
-                vl = GetInstrLineOfLabel(label);
+                vl = GetLineOfLabel(label);
                 vl = vl - instr_count;
                 Instruction_Memory[instr_count].data += vrs << 21;
                 Instruction_Memory[instr_count].data += vrt << 16;
@@ -1166,8 +1177,7 @@ void LoadFromAssembly(){
                 char *label = tokens[1];
                 Instruction_Memory[instr_count].data = 0b000010 << 26;
                 int vl;
-                vl = GetInstrLineOfLabel(label);
-                vl = vl - instr_count;
+                vl = GetLineOfLabel(label);
                 Instruction_Memory[instr_count].data += vl;
                 instr_count++;
                 if(verbose){
@@ -1179,8 +1189,7 @@ void LoadFromAssembly(){
                 char *label = tokens[1];
                 Instruction_Memory[instr_count].data = 0b000011 << 26;
                 int vl;
-                vl = GetInstrLineOfLabel(label);
-                vl = vl - instr_count;
+                vl = GetLineOfLabel(label);
                 Instruction_Memory[instr_count].data += vl;
                 instr_count++;
                 if(verbose){
@@ -1426,7 +1435,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] + [%d]\n", rd, rs, rt);
+                printf("[%d] = [%d](%d) + [%d](%d)\n", rd, rs, Data_Memory[rs].data, rt, Data_Memory[rt].data);
             }
         }
         else if(function == 0b100001){//ADDU
@@ -1437,7 +1446,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] + [%d]\n", rd, rs, rt);
+                printf("[%d] = [%d](%d) + [%d](%d)\n", rd, rs, Data_Memory[rs].data, rt, Data_Memory[rt].data);
             }
         }
         else if(function == 0b100100){//AND
@@ -1448,7 +1457,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] & [%d]\n", rd, rs, rt);
+                printf("[%d] = [%d](%d) & [%d](%d)\n", rd, rs, Data_Memory[rs].data, rt, Data_Memory[rt].data);
             }
         }
         else if(function == 0b001101){//BREAK
@@ -1472,7 +1481,7 @@ void ProcessInstruction(__32BitReg *instruction){
             lo.data = ALU_a.data;
             program_counter++;
             if(verbose){
-                printf("[hi] = [%d] / [%d] + [lo]\n", rs, rt);
+                printf("[hi] = [%d](%d) / [%d](%d) + [lo]\n", rs, Data_Memory[rs].data, rt, Data_Memory[rt].data);
             }
         }
         else if(function == 0b011011){//DIVU
@@ -1489,48 +1498,48 @@ void ProcessInstruction(__32BitReg *instruction){
             lo.data = ALU_a.data;
             program_counter++;
             if(verbose){
-                printf("[hi] = [%d] / [%d] + [lo]\n", rs, rt);
+                printf("[hi] = [%d](%d) / [%d](%d) + [lo]\n", rs, Data_Memory[rs].data, rt, Data_Memory[rt].data);          
             }
         }
         else if(function == 0b001000){//JR
             program_counter = Data_Memory[rs].data / 4;
             if(verbose){
-                printf("PC = [%d]\n", rs);
+                printf("PC = [%d](%d)\n", rs, Data_Memory[rs].data);
             }
         }
         else if(function == 0b001001){//JALR
             Data_Memory[rd].data = (program_counter + 1) * 4;
             program_counter = Data_Memory[rs].data / 4;
             if(verbose){
-                printf("[%d] = PC + 1; PC = [%d]\n", rd, rs);
+                printf("[%d] = PC(%d) + 1; PC = [%d](%d)\n", rd, program_counter, rs, Data_Memory[rs].data);
             }
         }
         else if(function == 0b010000){//MFHI
             Data_Memory[rd].data = hi.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [hi]\n", rd);
+                printf("[%d] = [hi](%d)\n", rd, hi.data);
             }
         }
         else if(function == 0b010010){//MFLO
             Data_Memory[rd].data = lo.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [lo]\n", rd);
+                printf("[%d] = [lo](%d)\n", rd, lo.data);
             }
         }
         else if(function == 0b010001){//MTHI
             hi.data = Data_Memory[rs].data;
             program_counter++;
             if(verbose){
-                printf("[hi] = [%d]\n", rs);
+                printf("[hi] = [%d](%d)\n", rs, Data_Memory[rs].data);
             }
         }
         else if(function == 0b010011){//MTLO
             lo.data = Data_Memory[rs].data;
             program_counter++;
             if(verbose){
-                printf("[lo] = [%d]\n", rs);
+                printf("[lo] = [%d](%d)\n", rs, Data_Memory[rs].data);
             }
         }
         else if(function == 0b011000){//MULT
@@ -1568,7 +1577,7 @@ void ProcessInstruction(__32BitReg *instruction){
             lo.data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[lo] = [%d] * [%d]\n", rs, rt);
+                printf("[lo] = [%d](%d) * [%d](%d)\n", rs, Data_Memory[rs].data, rt, Data_Memory[rt].data);
             }
         }
         else if(function == 0b011001){//MULTU
@@ -1606,7 +1615,7 @@ void ProcessInstruction(__32BitReg *instruction){
             lo.data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[lo] = [%d] * [%d]\n", rs, rt);
+                printf("[lo] = [%d](%d) * [%d](%d)\n", rs, Data_Memory[rs].data, rt, Data_Memory[rt].data);
             }
         }
         else if(function == 0b100101){//OR
@@ -1617,7 +1626,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] | [%d]\n", rd, rs, rt);
+                printf("[%d] = [%d](%d) | [%d](%d)\n", rd, rs, Data_Memory[rs].data, rt, Data_Memory[rt].data);
             }
         }
         else if(function == 0b100111){//NOR
@@ -1633,7 +1642,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_op.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] !| [%d]\n", rd, rs, rt);
+                printf("[%d] = [%d](%d) !| [%d](%d)\n", rd, rs, Data_Memory[rs].data, rt, Data_Memory[rt].data);
             }
         }
         else if(function == 0b000000){//SLL
@@ -1644,7 +1653,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] << %d\n", rd, rt, sa);
+                printf("[%d] = [%d](%d) << %d\n", rd, rt, Data_Memory[rt].data, sa);
             }
         }
         else if(function == 0b000100){//SLLV
@@ -1655,7 +1664,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] << [%d]\n", rd, rt, rs);
+                printf("[%d] = [%d](%d) << [%d](%d)\n", rd, rt, Data_Memory[rt].data, rs, Data_Memory[rs].data);
             }
         }
         else if(function == 0b101010){//SLT
@@ -1666,7 +1675,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("if([%d] < [%d]) [%d] = 1; else [%d] = 0\n", rs, rt, rd, rd);
+                printf("if([%d](%d) < [%d](%d)) [%d] = 1; else [%d] = 0\n", rs, Data_Memory[rs].data, rt, Data_Memory[rt].data, rd, rd);
             }
         }
         else if(function == 0b000011){//SRA
@@ -1677,7 +1686,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] >> %d\n", rd, rt, sa);
+                printf("[%d] = [%d](%d) >> %d\n", rd, rt, Data_Memory[rt].data, sa);
             }
         }
         else if(function == 0b000111){//SRAV
@@ -1688,7 +1697,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] >> [%d]\n", rd, rt, rs);
+                printf("[%d] = [%d](%d) >> [%d](%d)\n", rd, rt, Data_Memory[rt].data, rs, Data_Memory[rs].data);
             }
         }
         else if(function == 0b000010){//SRL
@@ -1699,7 +1708,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] >> %d\n", rd, rt, sa);
+                printf("[%d] = [%d](%d) >> %d\n", rd, rt, Data_Memory[rt].data, sa);
             }
         }
         else if(function == 0b000110){//SRLV
@@ -1710,7 +1719,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] >> [%d]\n", rd, rt, rs);
+                printf("[%d] = [%d](%d) >> [%d](%d)\n", rd, rt, Data_Memory[rt].data, rs, Data_Memory[rs].data);
             }
         }
         else if(function == 0b100010){//SUB
@@ -1721,7 +1730,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] - [%d]\n", rd, rs, rt);
+                printf("[%d] = [%d](%d) - [%d](%d)\n", rd, rs, Data_Memory[rs].data, rt, Data_Memory[rt].data);
             }
         }
         else if(function == 0b100011){//SUBU
@@ -1732,7 +1741,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] - [%d]\n", rd, rs, rt);
+                printf("[%d] = [%d](%d) - [%d](%d)\n", rd, rs, Data_Memory[rs].data, rt, Data_Memory[rt].data);
             }
         }
         else if(function == 0b001100){//SYSCALL
@@ -1868,7 +1877,7 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[rd].data = ALU_out.data;
             program_counter++;
             if(verbose){
-                printf("[%d] = [%d] ^ [%d]\n", rd, rs, rt);
+                printf("[%d] = [%d](%d) !^ [%d](%d)\n", rd, rs, Data_Memory[rs].data, rt, Data_Memory[rt].data);
             }
         }
     }
@@ -1883,7 +1892,7 @@ void ProcessInstruction(__32BitReg *instruction){
         Data_Memory[rt].data = ALU_out.data;
         program_counter++;
         if(verbose){
-            printf("[%d] = [%d] + %d\n", rt, rs, immediate);
+            printf("[%d] = [%d](%d) + %d\n", rt, rs, Data_Memory[rs].data, immediate);
         }
     }
     else if(opcode == 0b001001){ //ADDIU
@@ -1897,7 +1906,7 @@ void ProcessInstruction(__32BitReg *instruction){
         Data_Memory[rt].data = ALU_out.data;
         program_counter++;
         if(verbose){
-            printf("[%d] = [%d] + %d\n", rt, rs, immediate);
+            printf("[%d] = [%d](%d) + %d\n", rt, rs, Data_Memory[rs].data, immediate);
         }
     }
     else if(opcode == 0b001100){ //ANDI
@@ -1911,7 +1920,7 @@ void ProcessInstruction(__32BitReg *instruction){
         Data_Memory[rt].data = ALU_out.data;
         program_counter++;
         if(verbose){
-            printf("[%d] = [%d] & %d\n", rt, rs, immediate);
+            printf("[%d] = [%d](%d) & %d\n", rt, rs, Data_Memory[rs].data, immediate);
         }
     }
     else if(opcode == 0b000100){ //BEQ
@@ -1925,9 +1934,12 @@ void ProcessInstruction(__32BitReg *instruction){
         if(ALU_Flags.z){
             program_counter += immediate;
         }
-        program_counter++;
+        else
+        {
+            program_counter++;
+        }
         if(verbose){
-            printf("if([%d] == [%d]) PC += %d; else PC++\n", rt, rs, immediate);
+            printf("if([%d](%d) == [%d](%d)) PC += %d; else PC++\n", rt, Data_Memory[rt].data, rs, Data_Memory[rs].data, immediate);
         }
     }
     else if(opcode == 0b000001 && instruction->bit17 == 1 && instruction->bit21 == 0){ //BGEZ
@@ -1940,9 +1952,12 @@ void ProcessInstruction(__32BitReg *instruction){
         if(ALU_out.bit1 == 0){
             program_counter += immediate;
         }
-        program_counter++;
+        else
+        {
+            program_counter++;
+        }
         if(verbose){
-            printf("if([%d] >= [0]) PC += %d\n", rs, immediate);
+            printf("if([%d](%d) >= [0]) PC += %d\n", rs, Data_Memory[rs].data, immediate);
         }
     }
     else if(opcode == 0b000001 && instruction->bit17 == 1 && instruction->bit21 == 1){ //BGEZAL
@@ -1956,9 +1971,12 @@ void ProcessInstruction(__32BitReg *instruction){
             Data_Memory[31].data = (program_counter + 2) * 4;
             program_counter += immediate;
         }
-        program_counter++;
+        else
+        {
+            program_counter++;
+        }
         if(verbose){
-            printf("if([%d] >= [0]) [31] = PC + 8 PC += %d\n", rs, immediate);
+            printf("if([%d](%d) >= [0]) [31] = PC + 8 PC += %d\n", rs, Data_Memory[rs].data, immediate);
         }
     }
     else if(opcode == 0b000111 && instruction->bit17 == 0 && instruction->bit21 == 0){ //BGTZ
@@ -1971,9 +1989,12 @@ void ProcessInstruction(__32BitReg *instruction){
         if(ALU_out.bit1 == 1){
             program_counter += immediate;
         }
-        program_counter++;
+        else
+        {
+            program_counter++;
+        }
         if(verbose){
-            printf("if([%d] > [0]) PC += %d\n", rs, immediate);
+            printf("if([%d](%d) > [0]) PC += %d\n", rs, Data_Memory[rs].data, immediate);
         }
     }
     else if(opcode == 0b000110 && instruction->bit17 == 0 && instruction->bit21 == 0){ //BLEZ
@@ -1986,9 +2007,12 @@ void ProcessInstruction(__32BitReg *instruction){
         if(ALU_out.bit1 == 1){
             program_counter += immediate;
         }
-        program_counter++;
+        else
+        {
+            program_counter++;
+        }
         if(verbose){
-            printf("if([%d] <= [0]) PC += %d\n", rs, immediate);
+            printf("if([%d](%d) <= [0]) PC += %d\n", rs, Data_Memory[rs].data, immediate);
         }
     }
     else if(opcode == 0b000001 && instruction->bit17 == 0 && instruction->bit21 == 0){ //BLTZ
@@ -2001,9 +2025,12 @@ void ProcessInstruction(__32BitReg *instruction){
         if(ALU_out.bit1 == 1){
             program_counter += immediate;
         }
-        program_counter++;
+        else
+        {
+            program_counter++;
+        }
         if(verbose){
-            printf("if([%d] < [0]) PC += %d\n", rs, immediate);
+            printf("if([%d](%d) < [0]) PC += %d\n", rs, Data_Memory[rs].data, immediate);
         }
     }
     else if(opcode == 0b000101){ //BNE
@@ -2017,9 +2044,12 @@ void ProcessInstruction(__32BitReg *instruction){
         if(ALU_Flags.z == 0){
             program_counter += immediate;
         }
-        program_counter++;
+        else
+        {
+            program_counter++;
+        }
         if(verbose){
-            printf("if([%d] != [%d]) PC += %d\n", rt, rs, immediate);
+            printf("if([%d](%d) != [%d](%d)) PC += %d\n", rt, Data_Memory[rt].data, rs, Data_Memory[rs].data, immediate);
         }
     }
     else if(opcode == 0b100000){ //LB
@@ -2092,7 +2122,7 @@ void ProcessInstruction(__32BitReg *instruction){
         Data_Memory[rt].data = ALU_out.data;
         program_counter++;
         if(verbose){
-            printf("[%d] = [%d] | %d\n", rt, rs, immediate);
+            printf("[%d] = [%d](%d) | %d\n", rt, rs, Data_Memory[rs].data, immediate);
         }
     }
     else if(opcode == 0b100000){ //SB
@@ -2116,7 +2146,7 @@ void ProcessInstruction(__32BitReg *instruction){
         Data_Memory[rt].data = ALU_out.data;
         program_counter++;
         if(verbose){
-            printf("if([%d] < %d) [%d] = 1; else [%d] = 0\n", rs, immediate, rt, rt);
+            printf("if([%d](%d) < %d) [%d] = 1; else [%d] = 0\n", rs, Data_Memory[rs].data, immediate, rt, rt);
         }
     }
     else if(opcode == 0b001011){ //SLTIU
@@ -2130,7 +2160,7 @@ void ProcessInstruction(__32BitReg *instruction){
         Data_Memory[rt].data = ALU_out.data;
         program_counter++;
         if(verbose){
-            printf("if([%d] < %d) [%d] = 1; else [%d] = 0\n", rs, immediate, rt, rt);
+            printf("if([%d](%d) < %d) [%d] = 1; else [%d] = 0\n", rs, Data_Memory[rs].data, immediate, rt, rt);
         }
     }
     else if(opcode == 0b101001){ //SH
@@ -2164,7 +2194,7 @@ void ProcessInstruction(__32BitReg *instruction){
         Data_Memory[rt].data = ALU_out.data;
         program_counter++;
         if(verbose){
-            printf("[%d] = [%d] XOR %d\n", rt, rs, immediate);
+            printf("[%d] = [%d](%d) XOR %d\n", rt, rs, Data_Memory[rs].data, immediate);
         }
     }
     else if(opcode == 0b000010){ //J
@@ -2179,7 +2209,7 @@ void ProcessInstruction(__32BitReg *instruction){
         Data_Memory[31].data = program_counter + 2;
         program_counter = address;
         if(verbose){
-            printf("[31] = PC + 8; PC = %d\n", address);
+            printf("[31] = PC(%d) + 8; PC = %d\n", address, program_counter);
         }
     }
 }
@@ -2287,11 +2317,11 @@ char** Tokenize(char* line){
     char **tokens = malloc(100 * sizeof(char *));
     int token_index = 0;
     int char_index = 0;
-    int lineIndex;
+    int lineIndex = 0;
     int new = 0;
     tokens[0] = (char *)malloc(256);
     char c = line[lineIndex];
-    while(c != '\n' && c != '\0'){
+    while(c != '\n' && c != '\0' && c != '\r' && lineIndex < 256){
         if(c == 36 || c >= 48 && c <= 57 || c >= 65 && c <= 90 || c >= 97 && c <= 122){
             tokens[token_index][char_index] = c;
             char_index++;
@@ -2321,26 +2351,171 @@ int GetLengthOfLine(char * line){
     return count;
 }
 
-int GetInstrLineOfLabel(char *label){
-    long pos = ftell(im);
-    fseek(im, 0, SEEK_SET);
-    int lineIndex = 0;
-    int instr_count = 0;
-    char line[256];
-    do{//GET LABELS
-            fgets(line, 256, im);
-            if(strstr(line, ":")){
-                char *l = strtok(line, ":");
-                if(strcmp(label, l) == 0){
-                    fseek(im, pos, SEEK_SET);
-                    return instr_count - 2;
-                }
+int IsInstruction(char* line){
+            char ** tokens = Tokenize(line);
+            char *instr = tokens[0];
+            if(strcmp(instr, "add") == 0){
+                return 1;
             }
-            else if(GetLengthOfLine(line) > 8 && !strstr(line, ".")){
-                instr_count++;
+            else if(strcmp(instr, "addu") == 0){
+                return 1;
             }
-            lineIndex++;
-        }while(!feof(im));
-    fseek(im, pos, SEEK_SET);
-    return 0;
+            else if(strcmp(instr, "and") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "break") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "div") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "divu") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "jalr") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "jr") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "mfhi") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "mflo") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "mthi") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "mtlo") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "mult") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "multu") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "nor") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "or") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "sll") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "sllv") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "slt") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "sltu") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "sra") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "srav") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "srl") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "srlv") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "sub") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "subu") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "syscall") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "xor") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "addi") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "addiu") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "andi") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "beq") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "bgez") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "bgtz") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "blez") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "bltz") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "bne") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "lb") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "lbu") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "lh") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "lhu") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "lui") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "lw") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "lwcl") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "ori") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "sb") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "slti") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "sltiu") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "sh") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "sw") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "swcl") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "xori") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "j") == 0){
+                return 1;
+            }
+            else if(strcmp(instr, "jal") == 0){
+                return 1;
+            }
+            return 0;
 }
+
