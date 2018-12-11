@@ -1,0 +1,15 @@
+addi $s0, $zero, 57 	# a = 57
+addi $s1, $zero, 24 	# b = 24
+
+START:
+bne $s0, $s1, L1
+j EXIT
+
+L1:
+slt $s2, $s1, $s0
+beq $s2, $zero, EXIT
+addi $s1, $s1, 1
+j START
+
+EXIT:
+exit
