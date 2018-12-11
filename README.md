@@ -7,11 +7,14 @@ A C implementation of a 32 bits MIPS processor.
 ## 1.0. Getting started
 
 ### 1.1. Linux
-To compile the source code, simply run "gcc -o cmips Mipc.c hashmap.c hashmap.h".
+To compile the source code, simply run "gcc -o cmips Mipc.c".
 Then, run it by using ./cmips.
 
-### 1.2. Other Operating Systems
-The code is written in Standard C and tries to be as dependency-free as possible, thus, it should be possible to run it by using any native compiler.
+### 1.2. Windows
+Download MinGW and set up the environment variables properly (add the bin folder of MinGW to PATH). After, simply use "gcc -o cmipc Mipc.c" to compile. Lastly, run using cmips.
+
+### 1.3 Other operating systems
+The code is written in ANSI-C and it tries to be as dependency free as possible. Thus, it should technically work on any OS that has something similar to MinGW or that implements a very tiny subset of POSIX that handles user input and output.
 
 ## 2.0. Options
 
