@@ -37,7 +37,8 @@ Ultimately you can load the application providing a RAM file using the argument 
 If you are in need of debugging, you can run the application using "-v". This option will print in the console each step the application does in a really verbose and explicit way.
 
 ### 2.6. Assembly files
-There's one last developmental option. The application can accept files written in MIPS assembly. Most of the instructions work, though the jumps are currently not working properly.
+There's one last developmental option. The application can accept files written in MIPS assembly.
+**Most instructions work but the parser is not fully implemented, thus right now it only reads instructions if they are like in the example. Labels and jumps work as well.**
 
 ## 3.0. Supported instructions
 
