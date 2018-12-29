@@ -186,13 +186,17 @@ int main(int argc, char** argv){
                 return 0;
             }
             else if(strncmp(arg, "-i", 2) == 0){
-                fclose(im);
+                if(im != NULL) {
+                    fclose(im);
+                }
                 im = fopen(argv[i + 1], "r");
                 i++;
                 loadType == BINARY;
             }
             else if(strncmp(arg, "-d", 2) == 0){
-                fclose(dm);
+                if(dm != NULL) {
+                    fclose(dm);
+                }
                 dm = fopen(argv[i + 1], "w+");
                 fseek(dm, 0, SEEK_SET);
                 i++;
@@ -202,13 +206,17 @@ int main(int argc, char** argv){
                 i++;
             }
             else if(strncmp(arg, "-m", 2) == 0){
-                fclose(rm);
+                if(rm != NULL) {
+                    fclose(rm);
+                }
                 rm = fopen(argv[i + 1], "w+");
                 fseek(rm, 0, SEEK_SET);
                 i++;
             }
             else if(strncmp(arg, "-a", 2) == 0){
-                fclose(im);
+                if(im != NULL) {
+                    fclose(im);
+                }
                 im = fopen(argv[i + 1], "r");
                 i++;
                 loadType = ASSEMBLY;
@@ -2520,3 +2528,4 @@ int IsInstruction(char* line){
             }
             return 0;
 }
+
